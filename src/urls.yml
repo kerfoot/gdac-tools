@@ -1,0 +1,29 @@
+# List of U.S. IOOS National Glider Data Assembly Center urls for creation of erddapy-style end points. This list is
+# parsed by BASE/gdutils/urls.create_urls() to create the endpoints object.  The endpoints is imported using
+#
+# from gdutils.urls import end_points
+#
+NGDAC_ERDDAP_URL:
+  description: 'US IOOS Glider DAC ERDDAP Server'
+  url: 'https://gliders.ioos.us/erddap'
+NGDAC_DEPLOYMENTS_URL:
+  description: 'DAC Deployment Registration'
+  url: 'https://gliders.ioos.us'
+NGDAC_API_DEPLOYMENTS_URL:
+  description: 'Registered DAC data sets'
+  url: 'https://gliders.ioos.us/providers/api/deployment'
+NGDAC_ACTIVE_RT_DATASETS_STATUS_URL:
+  description: 'Active (incomplete) real-time data sets'
+  url: 'https://gliders.ioos.us/status/datasets/api/index.php?cat=datasets&mode=rt&status=incomplete'
+ALL_DATASETS_URL:
+  description: 'All (real-time & delayed-mode) complete and incomplete data sets'
+  url: 'https://gliders.ioos.us/status/datasets/api/index.php?cat=datasets&mode=all'
+REAL_TIME_DATASETS_URL:
+  description: 'All real-time data sets'
+  url: 'https://gliders.ioos.us/status/datasets/api/index.php?cat=datasets&mode=rt'
+DELAYED_MODE_DATASETS_URL:
+  description: 'All delayed mode data sets'
+  url: 'https://gliders.ioos.us/status/datasets/api/index.php?cat=datasets&mode=delayed'
+MISSING_ACCESSION_RECORDS_URL:
+  description: 'DAC data sets that have not been archived by NCEI'
+  url: 'https://gliders.ioos.us/status/datasets/api/ncei.php?missing=1'
