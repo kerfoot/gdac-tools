@@ -27,3 +27,6 @@ DELAYED_MODE_DATASETS_URL:
 MISSING_ACCESSION_RECORDS_URL:
   description: 'DAC data sets that have not been archived by NCEI'
   url: 'https://gliders.ioos.us/status/datasets/api/ncei.php?missing=1'
+OSMC_ERDDAP_URL:
+  description: 'OSMC ERDDAP serving GTS observation'
+  url: 'https://osmc.noaa.gov/erddap'
