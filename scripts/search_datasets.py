@@ -45,7 +45,11 @@ def main(args):
     end_time = client.erddap_datasets.maxtime.max()
 
     params = {}
-    if not dataset_ids:
+    if dataset_ids:
+        logging.info('Searching for the following data sets:')
+        for dataset_id in dataset_ids:
+            logging.info('Dataset ID: {:}'.format(dataset_id))
+    else:
 
         if start_ts:
             hours = 0
