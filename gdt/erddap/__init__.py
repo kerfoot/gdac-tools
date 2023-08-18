@@ -572,7 +572,7 @@ class GdacClient(object):
                 profiles = pd.read_csv(io.StringIO(r.text), skiprows=[1], index_col='time', parse_dates=True,
                                        na_values=['none', 'None']).sort_index()
 
-                self._logger.info('Found {:} profiles for data set {:} ({:0.1f} seconds)'.format(profiles.shape[0],
+                self._logger.debug('Found {:} profiles for data set {:} ({:0.1f} seconds)'.format(profiles.shape[0],
                                                                                                  dataset_id,
                                                                                                  r.elapsed.total_seconds()))
 
