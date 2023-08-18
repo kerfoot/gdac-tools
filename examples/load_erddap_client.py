@@ -19,7 +19,7 @@ log_level = getattr(logging, log_state)
 log_format = '%(asctime)s:%(module)s:%(levelname)s:%(message)s [line %(lineno)d]'
 logging.basicConfig(format=log_format, level=log_level)
 
-dataset_ids = []
+dataset_ids = ['sg677-20230530T0000']
 img_path = '/Users/kerfoot/Downloads'
 img_path = None
 title = ''
@@ -48,7 +48,12 @@ start_time = client.erddap_datasets.mintime.min()
 end_time = client.erddap_datasets.maxtime.max()
 
 params = {}
-if not dataset_ids:
+if dataset_ids:
+    logging.info('Searching for the following data sets:')
+    for dataset_id in dataset_ids:
+        logging.info('Dataset ID: {:}'.format(dataset_id))
+
+else:
 
     if start_ts:
         hours = 0
