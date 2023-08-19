@@ -14,7 +14,9 @@ from gdt.erddap.osmc import OsmcClient
 
 
 def main(args):
-    """Query the NOAA Observing System Monitoring Center (OSMC) ERDDAP server for available GTS glider observations"""
+    """Search the IOOS Glider DAC for data sets and query the NOAA Observing System Monitoring Center (OSMC) ERDDAP
+    server for the corresponding glider observations that have been released on GTS"""
+
     # Set up logger
     log_level = getattr(logging, args.loglevel.upper())
     log_format = '%(asctime)s:%(module)s:%(levelname)s:%(message)s [line %(lineno)d]'
