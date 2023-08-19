@@ -71,6 +71,11 @@ class OsmcClient(object):
                         'December']
 
     @property
+    def e(self):
+        """erddapy.ERDDAP client"""
+        return self._client
+
+    @property
     def profiles(self):
         return self._profiles
 
@@ -85,6 +90,10 @@ class OsmcClient(object):
     @property
     def obs(self):
         return self._obs
+
+    @property
+    def datasets(self):
+        return self._datasets
 
     @property
     def dataset_id(self):
