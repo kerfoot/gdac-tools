@@ -196,7 +196,7 @@ class OsmcClient(object):
             self._logger.error('Fetch failed: {:} for {:}'.format(e, data_url))
             return 0
 
-    def get_profiles_by_wmo_id(self, wmo_id, start_date, end_date, gps=False):
+    def get_profiles_by_wmo_id(self, wmo_id, start_date, end_date, gps=True):
 
         constraints = {'platform_code=': wmo_id,
                        'time>=': start_date,
@@ -228,11 +228,11 @@ class OsmcClient(object):
 
         return self._profiles
 
-    def get_dataset_profiles(self, datasets, gps=False):
+    def get_dataset_profiles(self, datasets, gps=True):
         """Fetch the GTS profiles for the specified dataset.  Profiles are searched by wmo ID (platform_code) and
         dataset start_date and end_date.  Returns a pandas DataFrame"""
 
-        self._logger.info('Fetching GTS observations from {:}'.format(self._dataset_id))
+        self._logger.debug('Fetching GTS observations from {:}'.format(self._dataset_id))
 
         if isinstance(datasets, pd.Series):
             datasets = datasets.to_frame().T
@@ -255,6 +255,9 @@ class OsmcClient(object):
             if not profiles.empty:
                 profiles['dataset_id'] = dataset_id
                 all_profiles.append(profiles)
+
+        if not all_profiles:
+            return pd.DataFrame()
 
         self._obs = pd.concat(all_profiles)
         return self._obs
