@@ -27,7 +27,7 @@ def main(args):
     start_ts = args.start_ts
     end_ts = args.end_ts
     clip_times = args.clip
-    response = args.format
+    format = args.format
     debug = args.debug
     north = args.north
     south = args.south
@@ -129,7 +129,7 @@ def main(args):
             dac_profiles = client.get_dataset_profiles(dataset_id)
             dataset_obs['dac_profiles_count'] = dac_profiles.loc[start_time:end_time].shape[0]
 
-        if row['wmo_id'] is None:
+        if not row.wmo_id:
             logging.warning('Skipping GTS fetch for {:} (No WMO id)'.format(dataset_id))
             obs_counts.append(dataset_obs)
             continue
@@ -161,9 +161,9 @@ def main(args):
     sys.stdout.write('DAC/OSMC Glider Activity Report: {:}\n'.format(
         datetime.datetime.utcnow().replace(tzinfo=pytz.UTC).strftime('%Y-%m-%d %H:%MZ')))
 
-    if response == 'json':
+    if format == 'json':
         sys.stdout.write('{:}\n'.format(df.to_json(orient='records')))
-    elif response == 'csv':
+    elif format == 'csv':
         sys.stdout.write('{:}\n'.format(df.to_csv()))
     else:
         sys.stdout.write(
