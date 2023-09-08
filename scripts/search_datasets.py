@@ -24,7 +24,7 @@ def main(args):
     hours = args.hours
     start_ts = args.start_ts
     end_ts = args.end_ts
-    response = args.format
+    format = args.format
     long_format = args.long_format
     debug = args.debug
     north = args.north
@@ -121,13 +121,14 @@ def main(args):
     if not long_format:
         datasets = datasets[print_columns]
 
-    if response == 'json':
+    if format == 'json':
         sys.stdout.write('{:}\n'.format(datasets.to_json(orient='records')))
-    elif response == 'csv':
+    elif format == 'csv':
         sys.stdout.write('{:}\n'.format(datasets.to_csv()))
     else:
         sys.stdout.write(
             '{:}\n'.format(tabulate.tabulate(datasets[print_columns], tablefmt=format, headers='keys')))
+
         logging.info('{:} data sets found'.format(datasets.shape[0]))
 
     return 0
