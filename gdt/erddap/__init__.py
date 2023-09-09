@@ -728,6 +728,70 @@ class GdacClient(object):
             self._logger.error('Failed to fetch {:} time-series: {:}'.format(dataset_id, e))
             return data
 
+    def _get_dataset_description(self, dataset_id:str):
+
+        info_url = self._client.get_info_url(dataset_id)
+
+        self._last_request = info_url
+
+        response = pd.read_csv(info_url)
+        # Rename columns for friendlier access
+        response = response.rename(columns={r: r.replace(' ', '_').lower() for r in response.columns})
+
+        # Get the variable names
+        var_names = response[response.row_type == 'variable']['variable_name'].values.tolist()
+
+        cdl = {'NC_GLOBAL': {},
+               'variables': {}
+               }
+
+        # NC_GLOBALs
+        for i, row in response[response.variable_name == 'NC_GLOBAL'].iterrows():
+
+            cdl['NC_GLOBAL'][row.attribute_name] = row['value']
+
+        for var_name in var_names:
+
+            props = response[response.variable_name == var_name]
+
+            if props.empty:
+                self._logger.warning('No description found for variable {:}'.format(var_name))
+                continue
+
+            desc = {'nc_var_name': var_name,
+                    'type': '',
+                    'attrs': {}
+                    }
+
+            # Set the dtype
+            desc['type'] = props[props.row_type == 'variable']['data_type'].iloc[0].lower()
+
+            for i, row in props[props.row_type == 'attribute'].iterrows():
+
+                desc['attrs'][row.attribute_name] = row.value
+
+            cdl['variables'][var_name] = desc
+
+        return cdl
+
+    def get_dataset_variables(self, dataset_id:str):
+        """Get variable names for the specified dataset_id"""
+
+        dataset_variables = []
+
+        if not self.check_dataset_exists(dataset_id):
+            return dataset_variables
+
+        cdl = self._get_dataset_description(dataset_id)
+
+        return list(cdl['variables'])
+
+    def get_dataset_cdl(self, dataset_id):
+        """Get the full data set global variables and variable description for the specified dataset_id"""
+
+        return self._get_dataset_description(dataset_id)
+
+
     def plot_yearly_totals(self, totals_type=None, palette='Blues_d', **kwargs):
         """Bar chart plot of deployments, glider days and profiles, grouped by year.  The numbers are from those data
         sets returned by self.search_datasets.
