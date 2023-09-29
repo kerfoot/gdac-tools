@@ -408,6 +408,8 @@ class GdacClient(object):
         :return: Valid WMO ID or empty string
         """
 
+        wmo_regex = re.compile(r'^\d{7}$')
+
         wmo_id = None
         if dataset_id not in self._erddap_datasets.index:
             self._logger.warning('Cannot fetch WMO id for invalid dataset id {:}'.format(dataset_id))
@@ -428,13 +430,25 @@ class GdacClient(object):
             wmo_ids = pd.read_csv(io.StringIO(r.text), skiprows=[1])
             if wmo_ids.empty:
                 self._logger.warning('No WMO ID found for {:}'.format(dataset_id))
+                return wmo_id
             elif wmo_ids.shape[0] > 1:
                 self._logger.warning('Multiple WMO IDs found for {:}'.format(dataset_id))
                 for i, row in wmo_ids.iterrows():
                     self._logger.warning('{:} WMO id: {:}'.format(dataset_id, row.wmo_id))
-            else:
-                wmo_id = wmo_ids.iloc[0].values.astype('int').astype('str')[0]
-                self._logger.info('WMO id for data set {:} is {:} '.format(dataset_id, wmo_id))
+                return wmo_id
+            elif not wmo_ids.iloc[0].values[0]:
+                self._logger.warning('NULL WMO id for data set {:}'.format(dataset_id))
+                return wmo_id
+
+            file_wmo_id = wmo_ids.iloc[0].wmo_id.astype(str)
+            match = wmo_regex.match(file_wmo_id)
+            if not match:
+                logging.error('Invalid WMO id for data set: {:}'.format(file_wmo_id))
+                logging.error('Valid WMO ids are 7-digit numbers')
+                return wmo_id
+
+            wmo_id = wmo_ids.iloc[0].values.astype('int').astype('str')[0]
+            self._logger.info('Dataset {:} WMO id is {:} '.format(dataset_id, wmo_id))
 
         except requests.exceptions.RequestException as e:
             self._logger.error('Failed to fetch WMO ID for {:}: reason={:}'.format(dataset_id, e))
@@ -529,7 +543,12 @@ class GdacClient(object):
             self._logger.error('Failed to fetch/parse ERDDAP server datasets info: {:} ({:})'.format(url, e))
             return
 
-        self._logger.info('{:} ERDDAP datasets found with specified criteria'.format(self._datasets_info.shape[0]))
+        if dataset_ids:
+            self._logger.info(
+                '{:} ERDDAP datasets found for {:} specified data set id(s)'.format(self._datasets_info.shape[0],
+                                                                                    len(dataset_ids)))
+        else:
+            self._logger.info('{:} ERDDAP datasets found with specified criteria'.format(self._datasets_info.shape[0]))
         if self._datasets_info.empty:
             return
 
@@ -573,8 +592,8 @@ class GdacClient(object):
                                        na_values=['none', 'None']).sort_index()
 
                 self._logger.debug('Found {:} profiles for data set {:} ({:0.1f} seconds)'.format(profiles.shape[0],
-                                                                                                 dataset_id,
-                                                                                                 r.elapsed.total_seconds()))
+                                                                                                  dataset_id,
+                                                                                                  r.elapsed.total_seconds()))
 
             except requests.exceptions.RequestException as e:
                 self._logger.error('Failed to fetch {:} profiles: {:}'.format(dataset_id, e))
@@ -728,7 +747,7 @@ class GdacClient(object):
             self._logger.error('Failed to fetch {:} time-series: {:}'.format(dataset_id, e))
             return data
 
-    def _get_dataset_description(self, dataset_id:str):
+    def _get_dataset_description(self, dataset_id: str):
 
         info_url = self._client.get_info_url(dataset_id)
 
@@ -747,7 +766,6 @@ class GdacClient(object):
 
         # NC_GLOBALs
         for i, row in response[response.variable_name == 'NC_GLOBAL'].iterrows():
-
             cdl['NC_GLOBAL'][row.attribute_name] = row['value']
 
         for var_name in var_names:
@@ -767,14 +785,13 @@ class GdacClient(object):
             desc['type'] = props[props.row_type == 'variable']['data_type'].iloc[0].lower()
 
             for i, row in props[props.row_type == 'attribute'].iterrows():
-
                 desc['attrs'][row.attribute_name] = row.value
 
             cdl['variables'][var_name] = desc
 
         return cdl
 
-    def get_dataset_variables(self, dataset_id:str):
+    def get_dataset_variables(self, dataset_id: str):
         """Get variable names for the specified dataset_id"""
 
         dataset_variables = []
@@ -790,7 +807,6 @@ class GdacClient(object):
         """Get the full data set global variables and variable description for the specified dataset_id"""
 
         return self._get_dataset_description(dataset_id)
-
 
     def plot_yearly_totals(self, totals_type=None, palette='Blues_d', **kwargs):
         """Bar chart plot of deployments, glider days and profiles, grouped by year.  The numbers are from those data
@@ -862,7 +878,6 @@ class GdacClient(object):
                 requests.exceptions.HTTPError) as e:
             self._logger.error(e)
             return pd.DataFrame([])
-
 
     @staticmethod
     def encode_url(data_url):
